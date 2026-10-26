@@ -1,4 +1,46 @@
 ---
 title: "Analyzing US Census Data"
 author: "Isabella Chandler"
+execute:
+  echo: false
 ---
+
+```{r}
+#| message: false
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+```{r}
+#| message: false
+#| cache: true
+income_tx <- get_acs(
+  geography = "county",
+  variables = "B19013_001",
+  state = "TX",
+  year = 2020,
+  geometry = TRUE
+)
+```
+
+```{r}
+ggplot(income_tx) +
+  geom_sf(aes(fill = estimate), color = "white", linewidth = 0.1) +
+  scale_fill_viridis_c(
+    option = "viridis",
+    labels = scales::label_dollar(),
+    name = "Median household income"
+  ) +
+  labs(
+    title = "Median Household Income by County",
+    subtitle = "Texas, 2020",
+    caption = "Source: U.S. Census Bureau, 2020 ACS 5-year estimates."
+  ) +
+  theme_void() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.caption = element_text(hjust = 0),
+    legend.position = "right"
+  )
+```
