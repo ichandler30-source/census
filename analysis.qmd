@@ -25,6 +25,53 @@ income_tx <- get_acs(
 ```
 
 ```{r}
+#| message: false
+edu_state <- get_acs(
+  geography = "state",
+  variables = c("B15003_001", "B15003_022", "B15003_023", "B15003_024", "B15003_025"),
+  summary_var = "B15003_001",
+  year = 2020
+)
+```
+
+```{r}
+#| fig-height: 14
+edu_state <- edu_state |>
+  filter(variable %in% c("B15003_022", "B15003_023", "B15003_024", "B15003_025")) |>
+  group_by(GEOID, NAME) |>
+  summarize(
+    percent_bachelors_and_higher = 100 * sum(estimate) / first(summary_est),
+    .groups = "drop"
+  ) |>
+  arrange(desc(percent_bachelors_and_higher))
+
+ggplot(edu_state, aes(
+  x = reorder(NAME, percent_bachelors_and_higher),
+  y = percent_bachelors_and_higher
+)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  scale_y_continuous(
+    labels = scales::label_percent(scale = 1),
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  labs(
+    title = "Bachelor's Degree or Higher by State",
+    subtitle = "Share of population age 25 and older, 2020",
+    x = NULL,
+    y = "Population age 25+ with a bachelor's or higher",
+    caption = "Source: U.S. Census Bureau, 2020 ACS 5-year estimates."
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.caption = element_text(hjust = 0),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+```
+
+```{r}
 ggplot(income_tx) +
   geom_sf(aes(fill = estimate), color = "white", linewidth = 0.1) +
   scale_fill_viridis_c(
