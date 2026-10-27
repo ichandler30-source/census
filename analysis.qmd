@@ -35,6 +35,55 @@ edu_state <- get_acs(
 ```
 
 ```{r}
+#| message: false
+age_ca <- get_acs(
+  geography = "county",
+  variables = c(median_age = "B01002_001", population = "B01003_001"),
+  state = "CA",
+  year = 2020,
+  geometry = FALSE
+)
+```
+
+```{r}
+age_ca_plot <- age_ca |>
+  select(NAME, variable, estimate) |>
+  pivot_wider(names_from = variable, values_from = estimate)
+
+largest_counties <- age_ca_plot |>
+  slice_max(population, n = 5) |>
+  arrange(desc(population)) |>
+  mutate(
+    label_x = population * c(1.05, 1.35, 0.75, 1.5, 0.7),
+    label_y = median_age + c(1.2, -1.2, 1.2, -1.2, 1.2),
+    label = str_remove(NAME, " County")
+  )
+
+ggplot(age_ca_plot, aes(x = population, y = median_age)) +
+  geom_point(alpha = 0.7, color = "steelblue") +
+  scale_x_log10(labels = scales::label_comma()) +
+  geom_segment(
+    data = largest_counties,
+    aes(xend = label_x, yend = label_y),
+    color = "gray50",
+    linewidth = 0.4
+  ) +
+  geom_text(
+    data = largest_counties,
+    aes(x = label_x, y = label_y, label = label),
+    size = 3.5
+  ) +
+  labs(
+    title = "Population and Median Age by County",
+    subtitle = "California counties, 2020",
+    x = "County population (log scale)",
+    y = "Median age (years)",
+    caption = "Source: U.S. Census Bureau, 2020 ACS 5-year estimates."
+  ) +
+  theme_minimal()
+```
+
+```{r}
 #| fig-height: 14
 edu_state <- edu_state |>
   filter(variable %in% c("B15003_022", "B15003_023", "B15003_024", "B15003_025")) |>
