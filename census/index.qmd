@@ -1,3 +1,35 @@
 ---
 title: "Age"
+execute:
+  echo: false
 ---
+
+```{r}
+#| message: false
+library(tidyverse)
+library(tidycensus)
+```
+
+```{r}
+#| message: false
+cleveland_age <- get_acs(
+  geography = "tract",
+  variables = c(median_age = "B01002_001"),
+  state = "OH",
+  county = "Cuyahoga",
+  year = 2022
+)
+
+cleveland_age |>
+  drop_na(estimate) |>
+  ggplot(aes(x = estimate)) +
+  geom_histogram(binwidth = 3, fill = "steelblue", color = "white") +
+  labs(
+    title = "Distribution of Median Age in the Cleveland Area",
+    subtitle = "By census tract in Cuyahoga County, Ohio (2022)",
+    x = "Median Age (years)",
+    y = "Number of Census Tracts",
+    caption = "Source: U.S. Census Bureau, 2018–2022 ACS 5-year estimates."
+  ) +
+  theme_minimal()
+```
