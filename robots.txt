@@ -1,1 +1,0 @@
-Sitemap: https://ichandler30-source.github.io/census/sitemap.xml
